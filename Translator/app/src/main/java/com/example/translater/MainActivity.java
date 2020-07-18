@@ -2,6 +2,7 @@ package com.example.translater;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -38,6 +39,41 @@ private Button btnTranslate;
 
     private Link interf = retrofit.create(Link.class);
 
+
+   public class QueryTask extends AsyncTask<String,Void,String>{
+        @Override
+        protected String doInBackground(String... strings) {
+            Map<String,String> mapJson = new HashMap<>();
+            mapJson.put("key",KEY);
+            mapJson.put("text",etText.getText().toString());
+            mapJson.put("lang","en-ru");
+
+            Call<Object> call = interf.translate(mapJson);
+
+            try {
+                Response<Object> response = call.execute();
+                Map<String,String> map = gson.fromJson(response.body().toString(),Map.class);
+                for(Map.Entry e : map.entrySet()){
+                    if(e.getKey().equals("text"))
+                        return e.getValue().toString();
+
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+             tvTextTrans.setText(s);
+        }
+    }
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,28 +85,10 @@ private Button btnTranslate;
         btnTranslate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Map<String,String> mapJson = new HashMap<>();
-                mapJson.put("key",KEY);
-                mapJson.put("text",etText.getText().toString());
-                mapJson.put("lang","en-ru");
 
-                Call<Object> call = interf.translate(mapJson);
-
-                try {
-                    Response<Object> response = call.execute();
-                    Map<String,String> map = gson.fromJson(response.body().toString(),Map.class);
-                    for(Map.Entry e : map.entrySet()){
-                        if(e.getKey().equals("text"))
-                            tvTextTrans.setText(e.getValue().toString());
-
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                new QueryTask().execute(URL);
             }
         });
-
 
     }
 }
