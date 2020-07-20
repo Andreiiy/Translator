@@ -41,11 +41,18 @@ private Button btnTranslate;
 
 
    public class QueryTask extends AsyncTask<String,Void,String>{
-        @Override
+
+       String translate;
+
+       public QueryTask(String translate) {
+           this.translate = translate;
+       }
+
+       @Override
         protected String doInBackground(String... strings) {
             Map<String,String> mapJson = new HashMap<>();
             mapJson.put("key",KEY);
-            mapJson.put("text",etText.getText().toString());
+            mapJson.put("text",translate);
             mapJson.put("lang","en-ru");
 
             Call<Object> call = interf.translate(mapJson);
@@ -86,7 +93,7 @@ private Button btnTranslate;
             @Override
             public void onClick(View v) {
 
-                new QueryTask().execute(URL);
+                new QueryTask(etText.getText().toString()).execute(URL);
             }
         });
 
